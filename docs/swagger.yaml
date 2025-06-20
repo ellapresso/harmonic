@@ -1,0 +1,286 @@
+openapi: 3.0.0
+info:
+  title: harmonic
+  version: 2.0.0
+
+  tags:
+    - name: USER
+      description: User management APIs
+    - name: AUTH
+      description: Authentication APIs
+    - name: SETTINGS
+      description: Settings APIs
+    - name: MAIN
+      description: Common APIs
+
+paths:
+  /signup:
+    post:
+      tags:
+        - AUTH
+      summary: 회원가입
+      description: 회원가입을 위한 API입니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: 사용자 이메일
+                  example: "user@example.com"
+                password:
+                  type: string
+                  description: 암호화 된 비밀번호
+                  example: "encrypted_password"
+      responses:
+        "200":
+          description: OK
+  /social/signup:
+    post:
+      tags:
+        - AUTH
+      summary: 소셜 회원가입
+      description: 소셜 회원가입을 위한 API입니다.
+      responses:
+        "200":
+          description: OK
+  /auth/signin:
+    post:
+      tags:
+        - AUTH
+      summary: 로그인 (Session 생성)
+      description: 로그인 API입니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: 사용자 이메일
+                  example: "user@example.com"
+                password:
+                  type: string
+                  description: 암호화 된 비밀번호
+                  example: "encrypted_password"
+      responses:
+        "201":
+          description: Created
+          headers:
+            Set-Cookie:
+              description: 세션 쿠키
+              schema:
+                type: string
+                example: "sessionId=abc123; Path=/; HttpOnly"
+  /user/info:
+    get:
+      tags:
+        - USER
+      summary: 유저 정보 조회
+      description: 유저 정보를 조회하는 API입니다. 기본적으로 이메일만 반환합니다.
+      parameters:
+        - name: includeDetails
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 상세 정보 포함 여부
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                    description: 사용자 이메일
+                    example: "user@example.com"
+    patch:
+      tags:
+        - USER
+      summary: 유저 정보 수정
+      responses:
+        "200":
+          description: OK
+  /auth/session:
+    delete:
+      tags:
+        - AUTH
+      summary: 로그아웃
+      responses:
+        "200":
+          description: OK
+  /settings:
+    get:
+      tags:
+        - SETTINGS
+      summary: 상세 설정 목록
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  settings:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        instrument:
+                          type: array
+                          items:
+                            type: string
+                          description: 사용악기 목록
+                          example: ["piano", "guitar"]
+                        genre:
+                          type: array
+                          items:
+                            type: string
+                          description: 장르 목록
+                          example: ["pop", "rock"]
+    patch:
+      tags:
+        - SETTINGS
+      summary: 상세 설정 수정
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                instrument:
+                  type: array
+                  items:
+                    type: string
+                  description: 사용악기 목록
+                  example: ["piano", "guitar"]
+                genre:
+                  type: array
+                  items:
+                    type: string
+                  description: 장르 목록
+                  example: ["pop", "rock"]
+      responses:
+        "200":
+          description: OK
+  /list/genre:
+    get:
+      tags:
+        - MAIN
+      summary: 1 Depth 목록
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  genres:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: 장르 ID
+                          example: "abc123"
+                        name:
+                          type: string
+                          description: 장르 이름
+                          example: "Pop"
+  /list/genre/{genreId}:
+    get:
+      tags:
+        - MAIN
+      summary: 2 Depth 목록
+      parameters:
+        - name: genreId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 장르 ID
+          example: "abc123"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subGenres:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: 하위 장르 ID
+                          example: "1-1"
+                        name:
+                          type: string
+                          description: 하위 장르 이름
+                          example: "K-Pop"
+  /list/scale:
+    get:
+      tags:
+        - MAIN
+      summary: Scale 목록
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scales:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        sheetid:
+                          type: string
+                          description: Scale ID
+                          example: "abc123"
+                        name:
+                          type: string
+                          description: Scale 이름
+                          example: "C Major"
+  /sheet/{sheetId}:
+    get:
+      tags:
+        - MAIN
+      summary: 악보 링크 요청
+      parameters:
+        - name: sheetId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 악보 ID
+          example: "abc123"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  link:
+                    type: string
+                    description: 악보 링크
+                    example: "https://example.com/sheet/1"
