@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: harmonic
-  version: 2.0.0
+  version: 1.0.0
 
   tags:
     - name: USER
@@ -12,6 +12,79 @@ info:
       description: Settings APIs
     - name: MAIN
       description: Common APIs
+
+components:
+  responses:
+    UnauthorizedError:
+      description: 인증 실패 (401)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Unauthorized
+    ForbiddenError:
+      description: 권한 없음 (403)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Forbidden
+    NotFoundError:
+      description: 요청한 리소스를 찾을 수 없음 (404)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Resource not found
+    SessionExpired:
+      description: 세션 만료 (419)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Session expired
+    TooManyRequests:
+      description: 요청 제한 초과 (429)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Too many requests, please try again later.
+    BadGateway:
+      description: 게이트웨이 오류 (502)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Bad Gateway
+    GatewayTimeout:
+      description: 게이트웨이 타임아웃 (504)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Gateway Timeout
 
 paths:
   /signup:
@@ -38,6 +111,20 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "419":
+          $ref: "#/components/responses/SessionExpired"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "504":
+          $ref: "#/components/responses/GatewayTimeout"
   /social/signup:
     post:
       tags:
@@ -47,11 +134,25 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "419":
+          $ref: "#/components/responses/SessionExpired"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "504":
+          $ref: "#/components/responses/GatewayTimeout"
   /auth/signin:
     post:
       tags:
         - AUTH
-      summary: 로그인 (Session 생성)
+      summary: 로그인 (헤더에 set-cookie, body에 access token 발급)
       description: 로그인 API입니다.
       requestBody:
         required: true
@@ -69,14 +170,36 @@ paths:
                   description: 암호화 된 비밀번호
                   example: "encrypted_password"
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           headers:
             Set-Cookie:
-              description: 세션 쿠키
+              description: 세션 ID가 포함된 쿠키
               schema:
                 type: string
-                example: "sessionId=abc123; Path=/; HttpOnly"
+              example: SESSIONID=abc123xyz; Path=/; HttpOnly; Secure
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6...
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "419":
+          $ref: "#/components/responses/SessionExpired"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "504":
+          $ref: "#/components/responses/GatewayTimeout"
   /user/info:
     get:
       tags:
@@ -102,6 +225,20 @@ paths:
                     type: string
                     description: 사용자 이메일
                     example: "user@example.com"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "419":
+          $ref: "#/components/responses/SessionExpired"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "504":
+          $ref: "#/components/responses/GatewayTimeout"
     patch:
       tags:
         - USER
@@ -109,6 +246,20 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "419":
+          $ref: "#/components/responses/SessionExpired"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "504":
+          $ref: "#/components/responses/GatewayTimeout"
   /auth/session:
     delete:
       tags:
@@ -117,6 +268,20 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "419":
+          $ref: "#/components/responses/SessionExpired"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "504":
+          $ref: "#/components/responses/GatewayTimeout"
   /settings:
     get:
       tags:
@@ -147,6 +312,20 @@ paths:
                             type: string
                           description: 장르 목록
                           example: ["pop", "rock"]
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "419":
+          $ref: "#/components/responses/SessionExpired"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "504":
+          $ref: "#/components/responses/GatewayTimeout"
     patch:
       tags:
         - SETTINGS
@@ -173,6 +352,20 @@ paths:
       responses:
         "200":
           description: OK
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "419":
+          $ref: "#/components/responses/SessionExpired"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "504":
+          $ref: "#/components/responses/GatewayTimeout"
   /list/genre:
     get:
       tags:
@@ -199,6 +392,20 @@ paths:
                           type: string
                           description: 장르 이름
                           example: "Pop"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "419":
+          $ref: "#/components/responses/SessionExpired"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "504":
+          $ref: "#/components/responses/GatewayTimeout"
   /list/genre/{genreId}:
     get:
       tags:
@@ -233,6 +440,20 @@ paths:
                           type: string
                           description: 하위 장르 이름
                           example: "K-Pop"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "419":
+          $ref: "#/components/responses/SessionExpired"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "504":
+          $ref: "#/components/responses/GatewayTimeout"
   /list/scale:
     get:
       tags:
@@ -259,6 +480,20 @@ paths:
                           type: string
                           description: Scale 이름
                           example: "C Major"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "419":
+          $ref: "#/components/responses/SessionExpired"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "504":
+          $ref: "#/components/responses/GatewayTimeout"
   /sheet/{sheetId}:
     get:
       tags:
@@ -284,3 +519,56 @@ paths:
                     type: string
                     description: 악보 링크
                     example: "https://example.com/sheet/1"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "419":
+          $ref: "#/components/responses/SessionExpired"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "504":
+          $ref: "#/components/responses/GatewayTimeout"
+  /sheet/{sheetId}/play:
+    get:
+      tags:
+        - MAIN
+      summary: 악보 재생 링크
+      parameters:
+        - name: sheetId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 악보 ID
+          example: "abc123"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  link:
+                    type: string
+                    description: 음원 링크
+                    example: "https://example.com/sheet/1"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "419":
+          $ref: "#/components/responses/SessionExpired"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          $ref: "#/components/responses/BadGateway"
+        "504":
+          $ref: "#/components/responses/GatewayTimeout"
